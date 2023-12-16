@@ -3,11 +3,11 @@ import "./Calculator.css";
 
 function Calculator() {
   const [currentValue, setCurrentValue] = useState("0");
-  const [pedingOperation, setPedingOperation] = useState(null);
-  const [pedingValue, setPedingValue] = useState(null);
+  const [pendingOperation, setPendingOperation] = useState(null);
+  const [pendingValue, setPendingValue] = useState(null);
   const [completeOperation, setCompleteOperation] = useState(null);
 
-  const keypadNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  const keypadNumbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
   const operations = ["+", "-", "*", "/"];
 
   const handleClick = (value) => {
@@ -27,11 +27,69 @@ function Calculator() {
     });
   };
 
+  const handleOperation = (operation) => {
+    setCompleteOperation(currentValue + " " + operation + " ");
+    setPendingOperation(operation);
+    setPendingValue(currentValue);
+    setCurrentValue("0");
+  };
+
   const handleClear = () => {
     setCurrentValue(0);
-    setPedingOperation(null);
-    setPedingValue(null);
+    setPendingOperation(null);
+    setPendingValue(null);
     setCompleteOperation(null);
+  };
+
+  const handleCalculate = () => {
+    if (!pendingOperation || !pendingValue) {
+      return;
+    }
+
+    const firstNumber = parseFloat(pendingValue);
+    const secondNumber = parseFloat(currentValue);
+
+    let result;
+
+    switch (pendingOperation) {
+      case "+":
+        result = firstNumber + secondNumber;
+        break;
+      case "-":
+        result = firstNumber - secondNumber;
+        break;
+      case "*":
+        result = firstNumber * secondNumber;
+        break;
+      case "/":
+        if (secondNumber !== 0) {
+          result = firstNumber / secondNumber;
+        } else {
+          setCurrentValue("Error");
+          setCompleteOperation("Error");
+          setPendingOperation(null);
+          setPendingValue(null);
+          return;
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    setCompleteOperation(
+      pendingValue +
+        " " +
+        pendingOperation +
+        " " +
+        currentValue +
+        " = " +
+        result
+    );
+
+    setCurrentValue(result.toString());
+    setPendingOperation(null);
+    setPendingValue(null);
   };
 
   return (
@@ -46,9 +104,11 @@ function Calculator() {
           </button>
         ))}
         {operations.map((operation) => (
-          <button key={operation}>{operation}</button>
+          <button key={operation} onClick={() => handleOperation(operation)}>
+            {operation}
+          </button>
         ))}
-        <button>=</button>
+        <button onClick={handleCalculate}>=</button>
       </div>
     </div>
   );
